@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="dashboard__header">
+        <h1 class="dashboard__title">Project Pulse</h1>
+        <p class="dashboard__subtitle">
+          A live snapshot of active projects, ownership, status, recent
+          movement, and priority.
+        </p>
+      </header>
+
+      <ul
+        class="dashboard__grid"
+        aria-label="Active projects"
+        id="project-grid"
+      ></ul>
+    </main>
+
+    <script>
+      const grid = document.getElementById("project-grid");
+      const missingValue = "—";
+
+      const statusLabels = {
+        "on-track": "On track",
+        "at-risk": "At risk",
+        "off-track": "Off track",
+        complete: "Complete",
+      };
+
+      const priorityLabels = {
+        high: "High",
+        medium: "Medium",
+        low: "Low",
+      };
+
+      function textOrFallback(value) {
+        if (value === undefined || value === null || value === "") {
+          return missingValue;
+        }
+
+        return String(value);
+      }
+
+      function knownValue(value, labels) {
+        return Object.prototype.hasOwnProperty.call(labels, value);
+      }
+
+      function appendScreenReaderPrefix(element, text) {
+        const prefix = document.createElement("span");
+        prefix.className = "visually-hidden";
+        prefix.textContent = text;
+        element.append(prefix);
+      }
+
+      function createStatusBadge(status) {
+        const statusText = textOrFallback(status);
+        const badge = document.createElement("span");
+        badge.className = "status-badge";
+
+        if (knownValue(statusText, statusLabels)) {
+          badge.classList.add(`status-badge--${statusText}`);
+        }
+
+        appendScreenReaderPrefix(badge, "Status: ");
+        badge.append(
+          document.createTextNode(statusLabels[statusText] || statusText),
+        );
+
+        return badge;
+      }
+
+      function createPriorityPill(priority) {
+        const priorityText = textOrFallback(priority);
+        const pill = document.createElement("span");
+        pill.className = "priority";
+
+        if (knownValue(priorityText, priorityLabels)) {
+          pill.classList.add(`priority--${priorityText}`);
+        }
+
+        appendScreenReaderPrefix(pill, "Priority: ");
+        pill.append(
+          document.createTextNode(priorityLabels[priorityText] || priorityText),
+        );
+
+        return pill;
+      }
+
+      function createProjectCard(project) {
+        const item = document.createElement("li");
+        const card = document.createElement("article");
+        card.className = "project-card";
+
+        const priorityText = textOrFallback(project.priority);
+        if (knownValue(priorityText, priorityLabels)) {
+          card.classList.add(`project-card--priority-${priorityText}`);
+        }
+
+        const name = document.createElement("h2");
+        name.className = "project-card__name";
+        name.textContent = textOrFallback(project.name);
+
+        const owner = document.createElement("div");
+        owner.className = "project-card__owner";
+        const ownerText = document.createElement("span");
+        ownerText.textContent = textOrFallback(project.owner);
+        owner.append(ownerText);
+
+        const status = document.createElement("div");
+        status.className = "project-card__status";
+        status.append(createStatusBadge(project.status));
+
+        const activity = document.createElement("p");
+        activity.className = "project-card__activity";
+        activity.textContent = textOrFallback(project.recentActivity);
+
+        const footer = document.createElement("div");
+        footer.className = "project-card__footer";
+        footer.append(createPriorityPill(project.priority));
+
+        card.append(name, owner, status, activity, footer);
+        item.append(card);
+
+        return item;
+      }
+
+      function showEmptyState() {
+        grid.replaceChildren();
+
+        const empty = document.createElement("li");
+        empty.className = "dashboard__empty";
+        empty.setAttribute("role", "status");
+        empty.textContent = "No active projects yet.";
+
+        grid.append(empty);
+      }
+
+      function renderProjects(projects) {
+        if (!Array.isArray(projects) || projects.length === 0) {
+          showEmptyState();
+          return;
+        }
+
+        const cards = projects.map(createProjectCard);
+        grid.replaceChildren(...cards);
+      }
+
+      fetch("project-data.json")
+        .then((r) => r.json())
+        .then((data) => renderProjects(data.projects))
+        .catch(showEmptyState);
+    </script>
+  </body>
+</html>

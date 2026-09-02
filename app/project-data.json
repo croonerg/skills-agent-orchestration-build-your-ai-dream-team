@@ -1,0 +1,46 @@
+{
+  "projects": [
+    {
+      "name": "Release Readiness Tracker",
+      "owner": "Mona A.",
+      "status": "on-track",
+      "recentActivity": "QA finished the smoke-test pass and the release notes are ready for review.",
+      "priority": "high"
+    },
+    {
+      "name": "Contributor Onboarding Refresh",
+      "owner": "Sam Patel",
+      "status": "at-risk",
+      "recentActivity": "Draft walkthrough is complete, but two setup screenshots need updates after the latest tooling change.",
+      "priority": "medium"
+    },
+    {
+      "name": "Internal Metrics Cleanup",
+      "owner": "Jordan L.",
+      "status": "complete",
+      "recentActivity": "Legacy dashboard links were retired and the new metrics labels are documented.",
+      "priority": "low"
+    },
+    {
+      "name": "Customer Feedback Triage Workflow Stabilization and Ownership Handoff",
+      "owner": "Priya N.",
+      "status": "off-track",
+      "recentActivity": "Automation rules are still producing duplicate assignments, and the team is pausing new intake until the routing logic is reviewed with support leads.",
+      "priority": "high"
+    },
+    {
+      "name": "Documentation Search Tuneup",
+      "owner": "Elliot Chen",
+      "status": "on-track",
+      "recentActivity": "Synonym testing improved search results for setup, billing, and troubleshooting articles.",
+      "priority": "medium"
+    },
+    {
+      "name": "Partner Sandbox Access Audit",
+      "owner": "Riley M.",
+      "status": "at-risk",
+      "recentActivity": "Access review is waiting on confirmation from two partner managers before the final removal list can be approved.",
+      "priority": "low"
+    }
+  ]
+}

@@ -34,7 +34,7 @@ implements the static files and the launch configuration.
    named, plus at least one long title and one long `recentActivity` string to
    stress the layout.
 4. **Coder writes `app/index.html`.** Semantic markup with an exact `Project
-   Pulse` title, `<link>` to `styles.css`, reference to `project-data.json`,
+Pulse` title, `<link>` to `styles.css`, reference to `project-data.json`,
    a `.dashboard` container, and visible project cards using the
    `project-card` class. Each card renders `name`, `owner`, `status`,
    `recentActivity`, and `priority`.
@@ -53,12 +53,12 @@ implements the static files and the launch configuration.
 
 ## 3. File Assignments
 
-| File | Owning agent | Contents / responsibility |
-| ---- | ------------ | ------------------------- |
-| `app/project-data.json` | Coder | Strict JSON. Top-level `projects` key holding an array. Each project object has `name`, `owner`, `status`, `recentActivity`, `priority`. Sample data exercises every status and priority value defined by Designer. |
-| `app/index.html` | Coder | Semantic HTML5. Exact page title `Project Pulse`. `<link rel="stylesheet" href="styles.css">`. Loads/references `project-data.json` and renders it into visible project cards using the `project-card` class inside a `.dashboard` container. Each card shows `name`, `owner`, `status`, `recentActivity`, and `priority`. Accessible landmarks and heading order per Designer direction. |
-| `app/styles.css` | Designer (may hand implementation to Coder) | Visual system for the dashboard. Must include `.dashboard` and `.project-card` selectors, `border-radius`, `box-shadow`, responsive layout, status-badge styles, priority treatment, focus-visible states, and accessible color contrast. |
-| `.vscode/launch.json` | Coder | Strict JSON with no comments. Configuration named `Run Project Pulse Dashboard`. `cwd` set to `${workspaceFolder}/app`. Command `python3 -m http.server 5500`. `serverReadyAction` that opens `http://localhost:%s/index.html` so the dashboard frontend loads, not a directory listing. |
+| File                    | Owning agent                                | Contents / responsibility                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/project-data.json` | Coder                                       | Strict JSON. Top-level `projects` key holding an array. Each project object has `name`, `owner`, `status`, `recentActivity`, `priority`. Sample data exercises every status and priority value defined by Designer.                                                                                                                                                                       |
+| `app/index.html`        | Coder                                       | Semantic HTML5. Exact page title `Project Pulse`. `<link rel="stylesheet" href="styles.css">`. Loads/references `project-data.json` and renders it into visible project cards using the `project-card` class inside a `.dashboard` container. Each card shows `name`, `owner`, `status`, `recentActivity`, and `priority`. Accessible landmarks and heading order per Designer direction. |
+| `app/styles.css`        | Designer (may hand implementation to Coder) | Visual system for the dashboard. Must include `.dashboard` and `.project-card` selectors, `border-radius`, `box-shadow`, responsive layout, status-badge styles, priority treatment, focus-visible states, and accessible color contrast.                                                                                                                                                 |
+| `.vscode/launch.json`   | Coder                                       | Strict JSON with no comments. Configuration named `Run Project Pulse Dashboard`. `cwd` set to `${workspaceFolder}/app`. Command `python3 -m http.server 5500`. `serverReadyAction` that opens `http://localhost:%s/index.html` so the dashboard frontend loads, not a directory listing.                                                                                                  |
 
 ## 4. Designer Responsibilities
 
@@ -115,25 +115,25 @@ implementation to Coder rather than Designer.
 
 ## 6. Dependencies Between Steps
 
-| Depends on | Blocks | Why |
-| ---------- | ------ | --- |
-| Data-shape decision (Step 1) | `app/index.html` markup, `app/project-data.json` sample data, `app/styles.css` badge/priority variants | Field names and enumerated status/priority values must exist before markup, sample data, and modifier classes can be written. |
-| Designer direction (Step 2) | `app/styles.css` implementation, `app/index.html` class hooks and semantic structure | CSS selectors, badge shapes, priority treatment, and accessibility rules must be agreed before styling and markup are finalized. |
-| `app/project-data.json` (Step 3) | `app/index.html` render logic | The markup needs to know exactly which fields to display and in what order. |
-| `app/index.html` (Step 4) | `.vscode/launch.json` (Step 6), Orchestrator integration check (Step 7) | Launch config targets `index.html`; the integration check needs the page to exist. |
-| Designer direction + `app/index.html` class hooks (Steps 2 and 4) | `app/styles.css` (Step 5) | CSS depends on both the visual spec and the DOM structure it will style. |
-| `app/index.html` present (Step 4) | `.vscode/launch.json` (Step 6) | Launch config's `serverReadyAction` opens `index.html`; the file must exist before the config is meaningful. |
+| Depends on                                                        | Blocks                                                                                                 | Why                                                                                                                              |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| Data-shape decision (Step 1)                                      | `app/index.html` markup, `app/project-data.json` sample data, `app/styles.css` badge/priority variants | Field names and enumerated status/priority values must exist before markup, sample data, and modifier classes can be written.    |
+| Designer direction (Step 2)                                       | `app/styles.css` implementation, `app/index.html` class hooks and semantic structure                   | CSS selectors, badge shapes, priority treatment, and accessibility rules must be agreed before styling and markup are finalized. |
+| `app/project-data.json` (Step 3)                                  | `app/index.html` render logic                                                                          | The markup needs to know exactly which fields to display and in what order.                                                      |
+| `app/index.html` (Step 4)                                         | `.vscode/launch.json` (Step 6), Orchestrator integration check (Step 7)                                | Launch config targets `index.html`; the integration check needs the page to exist.                                               |
+| Designer direction + `app/index.html` class hooks (Steps 2 and 4) | `app/styles.css` (Step 5)                                                                              | CSS depends on both the visual spec and the DOM structure it will style.                                                         |
+| `app/index.html` present (Step 4)                                 | `.vscode/launch.json` (Step 6)                                                                         | Launch config's `serverReadyAction` opens `index.html`; the file must exist before the config is meaningful.                     |
 
 ## 7. Parallel vs. Sequential Work
 
-| Track | Kind | Rationale |
-| ----- | ---- | --------- |
-| Step 1 (data contract) | Sequential, first | Everything downstream reads this contract. |
-| Step 2 (Designer direction) and Step 3 (`app/project-data.json`) | **Parallel** | File scopes do not overlap (`app/styles.css` vs. `app/project-data.json`) and neither reads the other's output during authoring. |
-| Step 4 (`app/index.html`) | Sequential after Steps 1–3 | Markup encodes the data contract and the Designer's class-hook contract. |
-| Step 5 (`app/styles.css`) | Sequential after Steps 2 and 4 | CSS must target the actual DOM structure the Coder produced and reflect the Designer's spec. |
-| Step 6 (`.vscode/launch.json`) | **Parallel** with Step 5 once Step 4 is done | `.vscode/launch.json` and `app/styles.css` do not overlap; both only need `app/index.html` to exist. |
-| Step 7 (integration check) | Sequential, last | Requires all four files to be in place. |
+| Track                                                            | Kind                                         | Rationale                                                                                                                        |
+| ---------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Step 1 (data contract)                                           | Sequential, first                            | Everything downstream reads this contract.                                                                                       |
+| Step 2 (Designer direction) and Step 3 (`app/project-data.json`) | **Parallel**                                 | File scopes do not overlap (`app/styles.css` vs. `app/project-data.json`) and neither reads the other's output during authoring. |
+| Step 4 (`app/index.html`)                                        | Sequential after Steps 1–3                   | Markup encodes the data contract and the Designer's class-hook contract.                                                         |
+| Step 5 (`app/styles.css`)                                        | Sequential after Steps 2 and 4               | CSS must target the actual DOM structure the Coder produced and reflect the Designer's spec.                                     |
+| Step 6 (`.vscode/launch.json`)                                   | **Parallel** with Step 5 once Step 4 is done | `.vscode/launch.json` and `app/styles.css` do not overlap; both only need `app/index.html` to exist.                             |
+| Step 7 (integration check)                                       | Sequential, last                             | Requires all four files to be in place.                                                                                          |
 
 ## 8. Validation Expectations
 

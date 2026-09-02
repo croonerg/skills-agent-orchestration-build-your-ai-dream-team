@@ -1,0 +1,554 @@
+/* ============================================================================
+   Project Pulse — Dashboard styles
+   Designer: Gemini 3.1 Pro
+   ----------------------------------------------------------------------------
+   CLASS-NAME CONTRACT (Coder must mirror these in app/index.html exactly)
+   ----------------------------------------------------------------------------
+   Page shell
+     .dashboard                      root <main> container
+     .dashboard__header              header area with title + subtitle
+     .dashboard__title               h1 "Project Pulse"
+     .dashboard__subtitle            short descriptor under the title
+     .dashboard__grid                <section> or <ul> that holds the cards
+     .dashboard__empty               empty-state block (zero projects)
+
+   Card (each card is an <article>)
+     .project-card                   card container
+     .project-card--priority-high    left-border accent modifier (also medium/low)
+     .project-card--priority-medium
+     .project-card--priority-low
+     .project-card__name             h2, project name             (field 1)
+     .project-card__owner            owner name/handle            (field 2)
+     .project-card__status           row wrapping the status badge (field 3)
+     .project-card__activity         recent activity text          (field 4)
+     .project-card__footer           footer row that holds priority (field 5)
+     .project-card__label            small caps label preceding a value
+     .project-card__value            value text following a label
+
+   Status badge (pill with a leading shape glyph)
+     .status-badge                   base pill (neutral fallback)
+     .status-badge--on-track
+     .status-badge--at-risk
+     .status-badge--off-track
+     .status-badge--complete
+
+   Priority indicator (pill with a leading icon)
+     .priority                       base pill (neutral fallback)
+     .priority--high
+     .priority--medium
+     .priority--low
+
+   ----------------------------------------------------------------------------
+   FIELD ORDER inside every .project-card:
+     1. name  2. owner  3. status  4. recent activity  5. priority
+   ----------------------------------------------------------------------------
+   ACCESSIBILITY CONTRACT (Coder must honor in markup)
+     - <main class="dashboard"> as the landmark; only one <h1>.
+     - Cards are <article> elements with an <h2> project name.
+     - Status badges include visually hidden text "Status:" (sr-only class OK,
+       or use aria-label on the badge); the shape glyph is decorative.
+     - Priority pills include visually hidden text "Priority:" similarly.
+     - Empty state is announced with role="status" on .dashboard__empty.
+     - Never rely on color alone: shape/icon + text label always accompany color.
+   ============================================================================ */
+
+/* ---------- Design tokens ------------------------------------------------- */
+:root {
+  /* Spacing scale (4 / 8 / 12 / 16 / 24 / 32 / 48) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Typography scale */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --fs-display: 1.75rem; /* 28px – dashboard title */
+  --fs-h2: 1.125rem; /* 18px – card title */
+  --fs-body: 0.9375rem; /* 15px – body */
+  --fs-small: 0.8125rem; /* 13px – labels / badges */
+  --fs-micro: 0.6875rem; /* 11px – all-caps micro labels */
+  --lh-tight: 1.25;
+  --lh-body: 1.55;
+
+  /* Neutral palette (WCAG AA verified on white / --surface-page) */
+  --color-page: #f4f6fb; /* app background — subtle blue-gray */
+  --color-surface: #ffffff; /* card background */
+  --color-surface-muted: #f7f8fb;
+  --color-border: #e3e6ee;
+  --color-border-strong: #cfd4e1;
+  --color-text: #14181f; /* 16.7:1 on white */
+  --color-text-muted: #4c5566; /* 8.1:1 on white */
+  --color-text-subtle: #6b7385; /* 5.1:1 on white — labels only */
+
+  /* Accents */
+  --color-accent: #2f4bd8;
+  --color-accent-strong: #1f36a8;
+  --color-focus: #2f4bd8;
+
+  /* Status tokens — background is very light, text is deep for AA contrast */
+  --status-on-track-bg: #e2f4ea;
+  --status-on-track-fg: #0f5132; /* 8.6:1 on bg */
+  --status-at-risk-bg: #fff2d6;
+  --status-at-risk-fg: #6b4200; /* 7.7:1 on bg */
+  --status-off-track-bg: #fde0e2;
+  --status-off-track-fg: #8a1a22; /* 6.9:1 on bg */
+  --status-complete-bg: #e0e7ff;
+  --status-complete-fg: #253081; /* 8.4:1 on bg */
+  --status-neutral-bg: #eceff5;
+  --status-neutral-fg: #2c3444;
+
+  /* Priority tokens — visually distinct from status */
+  --priority-high-bg: #ffe2e2;
+  --priority-high-fg: #8a1a22;
+  --priority-high-accent: #d1343f;
+  --priority-medium-bg: #fff2d6;
+  --priority-medium-fg: #6b4200;
+  --priority-medium-accent: #c6871a;
+  --priority-low-bg: #e2f4ea;
+  --priority-low-fg: #0f5132;
+  --priority-low-accent: #3ba374;
+  --priority-neutral-accent: var(--color-border-strong);
+
+  /* Elevation (layered soft shadows) */
+  --shadow-sm:
+    0 1px 2px rgba(15, 20, 40, 0.04), 0 1px 1px rgba(15, 20, 40, 0.03);
+  --shadow-md:
+    0 1px 2px rgba(15, 20, 40, 0.05), 0 6px 16px rgba(15, 20, 40, 0.06);
+  --shadow-lg:
+    0 2px 4px rgba(15, 20, 40, 0.06), 0 12px 28px rgba(15, 20, 40, 0.1);
+}
+
+/* ---------- Reset & base -------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--color-page);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: var(--color-accent);
+}
+a:hover {
+  color: var(--color-accent-strong);
+}
+
+/* Visually hidden helper (Coder may use for sr-only labels like "Status:") */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Focus ring (accessible, high contrast) ------------------------ */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Dashboard shell ---------------------------------------------- */
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) var(--space-7);
+}
+
+.dashboard__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dashboard__title {
+  font-size: var(--fs-display);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+
+.dashboard__subtitle {
+  font-size: var(--fs-body);
+  color: var(--color-text-muted);
+  max-width: 60ch;
+}
+
+/* ---------- Card grid (responsive with auto-fill) ------------------------ */
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-5);
+  align-items: stretch;
+}
+
+/* ---------- Empty state --------------------------------------------------- */
+.dashboard__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-7) var(--space-5);
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.dashboard__empty::before {
+  content: "";
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface-muted);
+  border: 2px dashed var(--color-border-strong);
+  margin-bottom: var(--space-2);
+}
+
+/* ---------- Project card -------------------------------------------------- */
+.project-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--priority-neutral-accent); /* neutral fallback */
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.project-card:hover,
+.project-card:focus-within {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Priority left-border accent (non-color signaling via border thickness too) */
+.project-card--priority-high {
+  border-left-width: 6px;
+  border-left-color: var(--priority-high-accent);
+}
+.project-card--priority-medium {
+  border-left-width: 5px;
+  border-left-color: var(--priority-medium-accent);
+}
+.project-card--priority-low {
+  border-left-width: 4px;
+  border-left-color: var(--priority-low-accent);
+}
+
+/* Card typography */
+.project-card__name {
+  font-size: var(--fs-h2);
+  font-weight: 650;
+  line-height: var(--lh-tight);
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.project-card__owner {
+  font-size: var(--fs-small);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  overflow-wrap: anywhere;
+}
+
+.project-card__owner::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+}
+
+.project-card__status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.project-card__activity {
+  font-size: var(--fs-body);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.project-card__footer {
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.project-card__label {
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.project-card__value {
+  font-size: var(--fs-body);
+  color: var(--color-text);
+}
+
+/* ---------- Status badge (pill w/ leading shape glyph) ------------------- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px 10px 4px 8px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  line-height: 1.2;
+  border-radius: var(--radius-pill);
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral-fg);
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+/* Decorative shape — differs per status so color is not the only cue */
+.status-badge::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  background: currentColor;
+  border-radius: 50%; /* default: dot (neutral) */
+}
+
+.status-badge--on-track {
+  background: var(--status-on-track-bg);
+  color: var(--status-on-track-fg);
+}
+.status-badge--on-track::before {
+  /* filled circle */
+  border-radius: 50%;
+}
+
+.status-badge--at-risk {
+  background: var(--status-at-risk-bg);
+  color: var(--status-at-risk-fg);
+}
+.status-badge--at-risk::before {
+  /* triangle */
+  width: 0;
+  height: 0;
+  background: transparent;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 10px solid currentColor;
+  border-radius: 0;
+}
+
+.status-badge--off-track {
+  background: var(--status-off-track-bg);
+  color: var(--status-off-track-fg);
+}
+.status-badge--off-track::before {
+  /* square */
+  border-radius: 2px;
+}
+
+.status-badge--complete {
+  background: var(--status-complete-bg);
+  color: var(--status-complete-fg);
+}
+.status-badge--complete::before {
+  /* check-like: rotated square with a slash — a distinct diamond */
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+
+/* ---------- Priority pill (distinct from status) ------------------------- */
+.priority {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px 10px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  line-height: 1.2;
+  border-radius: var(--radius-pill);
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral-fg);
+  border: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+/* Leading icon glyph — bar height varies per level for non-color signaling */
+.priority::before {
+  content: "";
+  flex: 0 0 auto;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background:
+    linear-gradient(currentColor, currentColor) left bottom / 3px 40% no-repeat,
+    linear-gradient(currentColor, currentColor) center bottom / 3px 70%
+      no-repeat,
+    linear-gradient(currentColor, currentColor) right bottom / 3px 100%
+      no-repeat;
+}
+
+.priority--high {
+  background: var(--priority-high-bg);
+  color: var(--priority-high-fg);
+  border-color: transparent;
+}
+
+.priority--medium {
+  background: var(--priority-medium-bg);
+  color: var(--priority-medium-fg);
+  border-color: transparent;
+}
+/* Medium: hide the tallest bar */
+.priority--medium::before {
+  background:
+    linear-gradient(currentColor, currentColor) left bottom / 3px 40% no-repeat,
+    linear-gradient(currentColor, currentColor) center bottom / 3px 70%
+      no-repeat;
+}
+
+.priority--low {
+  background: var(--priority-low-bg);
+  color: var(--priority-low-fg);
+  border-color: transparent;
+}
+/* Low: only the shortest bar */
+.priority--low::before {
+  background: linear-gradient(currentColor, currentColor) left bottom / 3px 40%
+    no-repeat;
+}
+
+/* ---------- Responsive breakpoints --------------------------------------- */
+
+/* Narrow: single column with tighter page padding */
+@media (max-width: 640px) {
+  .dashboard {
+    padding: var(--space-5) var(--space-4) var(--space-6);
+  }
+  .dashboard__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  .dashboard__title {
+    font-size: 1.5rem;
+  }
+  .project-card {
+    padding: var(--space-4);
+  }
+}
+
+/* Medium: 2-column comfortable */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .dashboard__grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+/* Wide: 3+ columns */
+@media (min-width: 1025px) {
+  .dashboard__grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
+/* ---------- Reduced motion ------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+  .project-card:hover,
+  .project-card:focus-within {
+    transform: none;
+  }
+}
+
+/* ---------- Print (bonus polish) ----------------------------------------- */
+@media print {
+  body {
+    background: #fff;
+  }
+  .project-card {
+    box-shadow: none;
+    border: 1px solid #999;
+    break-inside: avoid;
+  }
+}
